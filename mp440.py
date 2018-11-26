@@ -1,11 +1,13 @@
 import inspect
 import sys
 from collections import Counter
+import pdb
 import numpy as np
 import math
 
 f_count = {}
-k = 2.72 
+prior = {}
+k = 3
 
 '''
 Raise a "not defined" exception as a reminder 
@@ -31,7 +33,7 @@ def extract_basic_features(digit_data, width, height):
     # You should remove _raise_not_defined() after you complete your code
     # Your code ends here 
     #_raise_not_defined()
-    print "Inside first mp function printing features \n" + str(features) + ""
+    #print "Inside first mp function printing features \n" + str(features) + ""
     return features
 
 '''
@@ -80,27 +82,33 @@ def compute_statistics(data, label, width, height, feature_extractor, percentage
     #Cond prob
     f_count = {}
     for i in range(int(num_labels)):
+        #if label[i] == 1:
+        #    pdb.set_trace()
         if label[i] not in f_count:
             f_count[label[i]] = feature_counter(feature_extractor(data[i], width, height), None)
         else:
-            f_count[label[i]] = feature_counter(feature_extractor(data, width, height), f_count[label[i]]): 
+            f_count[label[i]] = feature_counter(feature_extractor(data[i], width, height), f_count[label[i]])
     #^^^ Now have all values necessary for cond prob calc
     span = (width*height)
     for i in range(10):
         for j in range(span):
             #f_count[label[i]][0][j] = float((max(f_count[label[i]][1][j], (f_count[label[i]][0][j]))))/(f_count[label[i]][1][j] + f_count[label[i][0]][j]) 
-            f_count[label[i]][1][j] = math.log(k + float(f_count[label[i]][1][j])/(f_count[label[i]][1][j] + f_count[label[i][0]][j]))
-
+            try:
+                f_count[label[i]][1][j] = math.log(float(k+f_count[label[i]][1][j])/(k+f_count[label[i]][1][j] + k+f_count[label[i]][0][j]) )
+            except:
+                print "feature " + str(f_count[label[i]][1][j]) + ", at label " + str(label[i]) + ", at index " + str(j)
+                print "pos " + str(f_count[label[i]][1][j]) + ", neg " + str(f_count[label[i]][0][j])
+                print "k " + str(k) + "\n"
 
 def feature_counter(feature_extractor, value = None):
     if value is None:
         value = np.zeros((2, len(feature_extractor)), dtype = int)
-    span = len(value)
+    span = len(value[0])
     for i in range(span):
-            if(feature_extractor[i] == False):
-                value[0][i] += 1
-            else:
-                value[1][i] += 1
+        if(feature_extractor[i] == False):
+            value[0][i] += 1
+        else:
+            value[1][i] += 1
     return value
 
 
@@ -109,17 +117,28 @@ For the given features for a single digit image, compute the class
 '''
 def compute_class(features):
     global f_count
-    predicted = -1
+    global prior
+    max_prob_label = (-1, -1)
+    summ = 0.0
     for label in f_count:
-        
-    return predicted
+        # Sum over the features that match per image
+        # set max_prob_label = max(max_prob_label, the newly calculated features sum)
+        summ += math.log(prior[label])
+        for idx, val in enumerate(f_count[label][1]):
+            if features[idx]:
+                summ += val
+            else:
+                summ += 1-val
+        if summ > max_prob_label[0]:
+            max_prob_label = (summ, label)
+        summ = 0.0
+    return max_prob_label[1]
 
 '''
 Compute joint probaility for all the classes and make predictions for a list
 of data
 '''
 def classify(data, width, height, feature_extractor):
-
     predicted=[]
     for image in data:
         predicted.append(compute_class(feature_extractor(image, width, height)))
