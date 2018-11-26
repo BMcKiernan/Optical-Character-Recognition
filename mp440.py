@@ -90,19 +90,19 @@ def compute_statistics(data, label, width, height, feature_extractor, percentage
             f_count[label[i]] = feature_counter(feature_extractor(data[i], width, height), f_count[label[i]])
     #^^^ Now have all values necessary for cond prob calc
     span = (width*height)
-    for i in range(10):
-        for j in range(span):
-            #f_count[label[i]][0][j] = float((max(f_count[label[i]][1][j], (f_count[label[i]][0][j]))))/(f_count[label[i]][1][j] + f_count[label[i][0]][j]) 
-            try:
-                f_count[label[i]][1][j] = math.log(float(k+f_count[label[i]][1][j])/(k+f_count[label[i]][1][j] + k+f_count[label[i]][0][j]) )
-            except:
-                print "feature " + str(f_count[label[i]][1][j]) + ", at label " + str(label[i]) + ", at index " + str(j)
-                print "pos " + str(f_count[label[i]][1][j]) + ", neg " + str(f_count[label[i]][0][j])
-                print "k " + str(k) + "\n"
+    for key in f_count: #check ya sanwhich
+        for i in range(2):
+            for j in range(span):
+                try:
+                    f_count[key][i][j] = math.log(float(k+f_count[key][i][j])/(k+f_count[key][1][j] + k+f_count[key][0][j]) )
+                except:
+                    print "feature " + str(f_count[label[i]][1][j]) + ", at label " + str(label[i]) + ", at index " + str(j)
+                    print "pos " + str(f_count[label[i]][1][j]) + ", neg " + str(f_count[label[i]][0][j])
+                    print "k " + str(k) + "\n"
 
 def feature_counter(feature_extractor, value = None):
     if value is None:
-        value = np.zeros((2, len(feature_extractor)), dtype = int)
+        value = np.zeros(2, len(feature_extractor))
     span = len(value[0])
     for i in range(span):
         if(feature_extractor[i] == False):
