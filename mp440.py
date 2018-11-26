@@ -1,5 +1,11 @@
 import inspect
 import sys
+from collections import Counter
+import numpy as np
+import math
+
+
+global k = 2.72
 
 '''
 Raise a "not defined" exception as a reminder 
@@ -15,10 +21,17 @@ forground (part of the digit)
 '''
 def extract_basic_features(digit_data, width, height):
     features=[]
+    for row in range(height):
+        for col in range(width):
+            if(digit_data[row][col] == 0):
+                features.append(False)
+            else:
+                features.append(True)
     # Your code starts here 
     # You should remove _raise_not_defined() after you complete your code
     # Your code ends here 
-    _raise_not_defined()
+    #_raise_not_defined()
+    print "Inside first mp function printing features \n" + str(features) + ""
     return features
 
 '''
@@ -55,10 +68,41 @@ The percentage parameter controls what percentage of the example data
 should be used for training. 
 '''
 def compute_statistics(data, label, width, height, feature_extractor, percentage=100.0):
-    # Your code starts here 
-    # You should remove _raise_not_defined() after you complete your code
-    # Your code ends here 
-    _raise_not_defined()
+    num_labels = len(label)*percentage/100
+    global prior
+    global f_count
+    #Get frequency of labels Ysub(i)
+    prior = Counter(label)
+    #Make values P(Y) instead of frequency
+    for key, value in prior.iteritems():
+        prior[key] = float(value)/num_labels
+       # print "key: " + str(key)+ " value: "+ str(prior[key])+ "\n"
+    #Cond prob
+    f_count = {}
+    for i in range(int(num_labels)):
+        if label[i] not in f_count:
+            f_count[label[i]] = feature_counter(feature_extractor(data[i], width, height), None)
+        else:
+            f_count[label[i]] = feature_counter(feature_extractor(data, width, height), f_count[label[i]] 
+    #^^^ Now have all values necessary for cond prob calc
+    span = (width*height)
+    for i in range(10):
+        for j in range(span):
+            #f_count[label[i]][0][j] = float((max(f_count[label[i]][1][j], (f_count[label[i]][0][j]))))/(f_count[label[i]][1][j] + f_count[label[i][0]][j]) 
+            f_count[label[i]][1][j] = math.log(k + float(f_count[label[i]][1][j])/(f_count[label[i]][1][j] + f_count[label[i][0]][j]))
+
+
+def feature_counter(feature_extractor, value = None):
+    if value is None:
+        value = np.zeros((2, len(feature_extractor)), dtype = int)
+    span = len(value)
+    for i in range(span):
+            if(feature_extractor[i] == False):
+                value[0][i] += 1
+            else:
+                value[1][i] += 1
+    return value
+
 
 '''
 For the given features for a single digit image, compute the class 
