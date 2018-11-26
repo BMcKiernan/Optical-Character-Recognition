@@ -5,7 +5,7 @@ import numpy as np
 import math
 
 
-global k = 2.72
+k = 2.72 
 
 '''
 Raise a "not defined" exception as a reminder 
@@ -83,7 +83,7 @@ def compute_statistics(data, label, width, height, feature_extractor, percentage
         if label[i] not in f_count:
             f_count[label[i]] = feature_counter(feature_extractor(data[i], width, height), None)
         else:
-            f_count[label[i]] = feature_counter(feature_extractor(data, width, height), f_count[label[i]] 
+            f_count[label[i]] = feature_counter(feature_extractor(data, width, height), f_count[label[i]]): 
     #^^^ Now have all values necessary for cond prob calc
     span = (width*height)
     for i in range(10):
