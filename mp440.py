@@ -4,7 +4,7 @@ from collections import Counter
 import numpy as np
 import math
 
-
+f_count = {}
 k = 2.72 
 
 '''
@@ -108,13 +108,10 @@ def feature_counter(feature_extractor, value = None):
 For the given features for a single digit image, compute the class 
 '''
 def compute_class(features):
+    global f_count
     predicted = -1
-
-    # Your code starts here 
-    # You should remove _raise_not_defined() after you complete your code
-    # Your code ends here 
-    _raise_not_defined()
-
+    for label in f_count:
+        
     return predicted
 
 '''
@@ -124,12 +121,8 @@ of data
 def classify(data, width, height, feature_extractor):
 
     predicted=[]
-
-    # Your code starts here 
-    # You should remove _raise_not_defined() after you complete your code
-    # Your code ends here 
-    _raise_not_defined()
-
+    for image in data:
+        predicted.append(compute_class(feature_extractor(image, width, height)))
     return predicted
 
 
