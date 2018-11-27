@@ -5,9 +5,9 @@ import pdb
 import numpy as np
 import math
 
-f_count = {}
-prior = {}
-k = 3
+
+k = math.e
+
 
 '''
 Raise a "not defined" exception as a reminder 
@@ -16,9 +16,21 @@ def _raise_not_defined():
     print "Method not implemented: %s" % inspect.stack()[1][3]
     sys.exit(1)
 
+def _value_to_pixel(value):
+    if(value == 0):
+        return ' '
+    elif(value == 1):
+        return '#'
+    elif(value == 2):
+        return '+'
+
+
+def _print_digit_image(data):
+    for row in range(len(data)):
+        print ''.join(map(_value_to_pixel, data[row]))
 
 '''
-Extract 'basic' features, i.e., whether a pixel is background or
+Eundorxtract 'basic' features, i.e., whether a pixel is backgro 
 forground (part of the digit) 
 '''
 def extract_basic_features(digit_data, width, height):
@@ -29,11 +41,6 @@ def extract_basic_features(digit_data, width, height):
                 features.append(False)
             else:
                 features.append(True)
-    # Your code starts here 
-    # You should remove _raise_not_defined() after you complete your code
-    # Your code ends here 
-    #_raise_not_defined()
-    #print "Inside first mp function printing features \n" + str(features) + ""
     return features
 
 '''
@@ -78,32 +85,26 @@ def compute_statistics(data, label, width, height, feature_extractor, percentage
     #Make values P(Y) instead of frequency
     for key, value in prior.iteritems():
         prior[key] = float(value)/num_labels
-       # print "key: " + str(key)+ " value: "+ str(prior[key])+ "\n"
     #Cond prob
     f_count = {}
     for i in range(int(num_labels)):
-        #if label[i] == 1:
-        #    pdb.set_trace()
         if label[i] not in f_count:
             f_count[label[i]] = feature_counter(feature_extractor(data[i], width, height), None)
         else:
             f_count[label[i]] = feature_counter(feature_extractor(data[i], width, height), f_count[label[i]])
     #^^^ Now have all values necessary for cond prob calc
     span = (width*height)
-    for key in f_count: #check ya sanwhich
+    for key in f_count: 
         for i in range(2):
             for j in range(span):
-                try:
-                    f_count[key][i][j] = math.log(float(k+f_count[key][i][j])/(k+f_count[key][1][j] + k+f_count[key][0][j]) )
-                except:
-                    print "feature " + str(f_count[label[i]][1][j]) + ", at label " + str(label[i]) + ", at index " + str(j)
-                    print "pos " + str(f_count[label[i]][1][j]) + ", neg " + str(f_count[label[i]][0][j])
-                    print "k " + str(k) + "\n"
+                f_count[key][i][j] = k + math.log(.0000001 + float((f_count[key][i][j])/(prior[key]*num_labels)))
+                
 
 def feature_counter(feature_extractor, value = None):
+    span = len(feature_extractor)
     if value is None:
-        value = np.zeros(2, len(feature_extractor))
-    span = len(value[0])
+        value = [[0.0 for i in range(span)] for i in range(2)]
+        #value = np.zeros((2, len(feature_extractor))
     for i in range(span):
         if(feature_extractor[i] == False):
             value[0][i] += 1
@@ -118,21 +119,25 @@ For the given features for a single digit image, compute the class
 def compute_class(features):
     global f_count
     global prior
-    max_prob_label = (-1, -1)
-    summ = 0.0
-    for label in f_count:
-        # Sum over the features that match per image
-        # set max_prob_label = max(max_prob_label, the newly calculated features sum)
-        summ += math.log(prior[label])
-        for idx, val in enumerate(f_count[label][1]):
-            if features[idx]:
-                summ += val
+    span = len(features) 
+    #image_sum = [[0.0 for i in range(span)] for j in range(2)] #
+   # global saved_image
+    max_match = [0.0, None]
+    for key in f_count:
+        _sum = 0.0
+        _sum += math.log(prior[key])
+        for i in range(span):
+            if features[i]:
+       #         image_sum[1][i] += f_count[key][1][i]
+                _sum += f_count[key][1][i]
             else:
-                summ += 1-val
-        if summ > max_prob_label[0]:
-            max_prob_label = (summ, label)
-        summ = 0.0
-    return max_prob_label[1]
+      #          image_sum[0][i] += f_count[key][0][i]
+                _sum += f_count[key][0][i]
+        if _sum > max_match[0]:
+     #       saved_image = image_sum
+            max_match = [_sum, key]
+    #print_data(saved_image, max_match[1])
+    return max_match[1]
 
 '''
 Compute joint probaility for all the classes and make predictions for a list
@@ -141,12 +146,28 @@ of data
 def classify(data, width, height, feature_extractor):
     predicted=[]
     for image in data:
+        #print "Printing Image: "
+        #_print_digit_image(image)
         predicted.append(compute_class(feature_extractor(image, width, height)))
     return predicted
 
 
 
-
+def print_data(shit, key):
+    span = (28*28)
+    count = 0
+    for i in range(2):
+        if i == 0:
+            print "\n\n Printing false for label " + str(key) + " \n"
+        else:
+            print "\n\n Printing true for label " + str(key) + " \n"
+        for j in range(span):
+            if count == 0 or 28%count != 0:
+                count += 1
+                print( str(shit[i][j]) + " ,"),
+            else:
+                count += 1
+                print str(shit[i][j]) + " \n"
 
 
 
