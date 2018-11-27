@@ -8,7 +8,6 @@ import math
 
 k = math.e
 
-
 '''
 Raise a "not defined" exception as a reminder 
 '''
@@ -104,7 +103,6 @@ def feature_counter(feature_extractor, value = None):
     span = len(feature_extractor)
     if value is None:
         value = [[0.0 for i in range(span)] for i in range(2)]
-        #value = np.zeros((2, len(feature_extractor))
     for i in range(span):
         if(feature_extractor[i] == False):
             value[0][i] += 1
@@ -153,7 +151,7 @@ def classify(data, width, height, feature_extractor):
 
 
 
-def print_data(shit, key):
+def print_data(image_data, key):
     span = (28*28)
     count = 0
     for i in range(2):
@@ -164,10 +162,10 @@ def print_data(shit, key):
         for j in range(span):
             if count == 0 or 28%count != 0:
                 count += 1
-                print( str(shit[i][j]) + " ,"),
+                print( str(image_data[i][j]) + " ,"),
             else:
                 count += 1
-                print str(shit[i][j]) + " \n"
+                print str(image_data[i][j]) + " \n"
 
 
 
