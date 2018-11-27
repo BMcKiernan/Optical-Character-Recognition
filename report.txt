@@ -1,0 +1,20 @@
+
+a.2)
+The drawbacks would be that multiplication is more computationally instensive than addition and accuracy is lost in multiple successive multiplications.
+
+a.5)
+ 10% of data:	0.635
+ 20% of data:	0.716
+ 30% of data:	0.735
+ 40% of data:	0.75
+ 50% of data:	0.782
+ 60% of data:	0.785
+ 70% of data:	0.793
+ 80% of data:	0.802
+ 90% of data:	0.81
+100% of data:	0.825
+
+a.6)
+We looked at the y=lnx curve and we noticed that if we set k=e, we would have all of our results positive, and that's what we tried first, this would give us an output range of [0, ln(e+1)]. We then thought that by moving the output range down to include negative numbers as well, so we tried to divide e by different ingtegers and found that e/9 yields the maximum output when substituted in the formulae that are provided in the link in the assignment description. That gave us 73% accuracy. This would imply that 8/9th of the range would be negative numbers and 1/9th positive => low accuracy is a big penalty and decreases your score. However, we noticed that by changing the formula a little bit by kicking k outside of the log and adding a very small number to the probability to avoid log(0) we got 82.5% prediction accuracy. So we went with this second approach with k + log(p+n). where k = e, p = probability that this feature is True and n = 0.0000001.
+
+
