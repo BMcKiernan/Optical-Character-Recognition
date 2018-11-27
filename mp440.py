@@ -7,7 +7,7 @@ import math
 
 f_count = {}
 prior = {}
-k = 3
+k = 6000
 
 '''
 Raise a "not defined" exception as a reminder 
@@ -102,7 +102,7 @@ def compute_statistics(data, label, width, height, feature_extractor, percentage
 
 def feature_counter(feature_extractor, value = None):
     if value is None:
-        value = np.zeros(2, len(feature_extractor))
+        value = np.zeros((2, len(feature_extractor)))
     span = len(value[0])
     for i in range(span):
         if(feature_extractor[i] == False):
@@ -123,6 +123,7 @@ def compute_class(features):
     for label in f_count:
         # Sum over the features that match per image
         # set max_prob_label = max(max_prob_label, the newly calculated features sum)
+        summ = 0.0
         summ += math.log(prior[label])
         for idx, val in enumerate(f_count[label][1]):
             if features[idx]:
@@ -131,7 +132,6 @@ def compute_class(features):
                 summ += 1-val
         if summ > max_prob_label[0]:
             max_prob_label = (summ, label)
-        summ = 0.0
     return max_prob_label[1]
 
 '''
