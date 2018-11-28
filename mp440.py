@@ -4,10 +4,11 @@ from collections import Counter
 import pdb
 import numpy as np
 import math
+import random
 
 f_count = {}
 prior = {}
-k = 6000
+k = math.e
 
 '''
 Raise a "not defined" exception as a reminder 
@@ -39,13 +40,88 @@ def extract_basic_features(digit_data, width, height):
 '''
 Extract advanced features that you will come up with 
 '''
+# Double image size and fill holes sorta
 def extract_advanced_features(digit_data, width, height):
-    features=[]
-    # Your code starts here 
-    # You should remove _raise_not_defined() after you complete your code
-    # Your code ends here 
-    _raise_not_defined()
+    features = [ False ] * (4*width*height)
+    for r in range(height):
+        for c in range(width):
+            if digit_data[r][c] > 0:
+                features[width*r*2 + c*2] = True
+                features[width*r*2 + c*2 + 1] = True
+                features[width*r*2 + c*2 - 1] = True
+                features[(width-1)*r*2 + c*2] = True
+                if r < height - 1:
+                    features[(width+1)*r*2 + c*2] = True
     return features
+
+
+'''
+def extract_advanced_features(digit_data, width, height):
+    x1 = -1
+    x2 = -1
+    x3 = -1
+    x4 = -1
+    top = 0
+    bottom = height - 1
+    c_idx = 0
+    centers = [ 0 ] * width
+    for row in digit_data:
+        if 1 in row or 2 in row:
+            for i, val in enumerate(row):
+                if val > 0:
+                    if x1 == -1:
+                        x1 = i
+                    x2 = i
+            centers[c_idx] = float(x2 + x1)/2
+            c_idx += 1
+            x1 = -1
+        else:
+            if c_idx < 1:
+                top += 1
+    for idx in range(height):
+        if 1 in digit_data[-idx] or 2 in digit_data[-idx]:
+            bottom -= idx
+            #for i, val in enumerate(digit_data[-idx]):
+            #    if val > 0:
+            #        if x3 == -1:
+            #            x3 = i
+            #        x4 = i
+            break
+    # average out the slope
+    dy = float(top - bottom)
+    slopes = [0] * c_idx
+    for i in range(c_idx):
+        if centers[i] - centers[i-1] != 0:
+            if i > 0:
+                slopes[i] = dy/(centers[i] - centers[i-1])
+        else:
+            slopes[i] = dy/centers[i]
+    del slopes[0]
+    slope = -abs(sum(slopes)/len(slopes))
+    print slope
+    #print "dx: " + str(dx) + ", dy: " + str(dy)
+    dc = 0
+    ft = [[False for x in range(width)] for y in range(height) ]
+    for r in range(height):
+        for c in range(width):
+            if digit_data[r][c] > 0:
+                dc = bmx(slope, r)
+                try:
+                    ft[r][c - dc] = True
+                except:
+                    ft[r][c] = True
+    features = []
+    for row in ft:
+        for col in row:
+            features.append(col)
+    return features
+
+def bmx(slope, y):
+    if slope is None:
+        return int(y)
+    else:
+        return int((y-28)/slope)
+'''
 
 '''
 Extract the final features that you would like to use
@@ -70,7 +146,7 @@ The percentage parameter controls what percentage of the example data
 should be used for training. 
 '''
 def compute_statistics(data, label, width, height, feature_extractor, percentage=100.0):
-    num_labels = len(label)*percentage/100
+    num_labels = int(len(label)*percentage/100)
     global prior
     global f_count
     #Get frequency of labels Ysub(i)
@@ -81,7 +157,7 @@ def compute_statistics(data, label, width, height, feature_extractor, percentage
        # print "key: " + str(key)+ " value: "+ str(prior[key])+ "\n"
     #Cond prob
     f_count = {}
-    for i in range(int(num_labels)):
+    for i in range(num_labels):
         #if label[i] == 1:
         #    pdb.set_trace()
         if label[i] not in f_count:
@@ -89,21 +165,18 @@ def compute_statistics(data, label, width, height, feature_extractor, percentage
         else:
             f_count[label[i]] = feature_counter(feature_extractor(data[i], width, height), f_count[label[i]])
     #^^^ Now have all values necessary for cond prob calc
-    span = (width*height)
-    for key in f_count: #check ya sanwhich
-        for i in range(2):
-            for j in range(span):
-                try:
-                    f_count[key][i][j] = math.log(float(k+f_count[key][i][j])/(k+f_count[key][1][j] + k+f_count[key][0][j]) )
-                except:
-                    print "feature " + str(f_count[label[i]][1][j]) + ", at label " + str(label[i]) + ", at index " + str(j)
-                    print "pos " + str(f_count[label[i]][1][j]) + ", neg " + str(f_count[label[i]][0][j])
-                    print "k " + str(k) + "\n"
+
+    span = len(f_count[random.choice(f_count.keys())][1])
+    total = 0
+    for key in f_count:
+        total = num_labels * prior[key]
+        for j in range(span):
+            f_count[key][1][j] = f_count[key][1][j]/total
 
 def feature_counter(feature_extractor, value = None):
     if value is None:
         value = np.zeros((2, len(feature_extractor)))
-    span = len(value[0])
+    span = len(feature_extractor)
     for i in range(span):
         if(feature_extractor[i] == False):
             value[0][i] += 1
@@ -127,9 +200,9 @@ def compute_class(features):
         summ += math.log(prior[label])
         for idx, val in enumerate(f_count[label][1]):
             if features[idx]:
-                summ += val
+                summ += k+math.log(0.00000001+val)
             else:
-                summ += 1-val
+                summ += k+math.log(0.00000001+1-val)
         if summ > max_prob_label[0]:
             max_prob_label = (summ, label)
     return max_prob_label[1]
