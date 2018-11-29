@@ -48,6 +48,7 @@ def extract_basic_features(digit_data, width, height):
 '''
 Extract advanced features that you will come up with 
 '''
+'''
 # Double image size and fill holes sorta
 def extract_advanced_features(digit_data, width, height):
     features = [ False ] * (4*width*height)
@@ -61,9 +62,9 @@ def extract_advanced_features(digit_data, width, height):
                 if r < height - 1:
                     features[(width+1)*r*2 + c*2] = True
     return features
-
-
 '''
+
+
 def extract_advanced_features(digit_data, width, height):
     x1 = -1
     x2 = -1
@@ -89,47 +90,50 @@ def extract_advanced_features(digit_data, width, height):
     for idx in range(height):
         if 1 in digit_data[-idx] or 2 in digit_data[-idx]:
             bottom -= idx
-            #for i, val in enumerate(digit_data[-idx]):
-            #    if val > 0:
-            #        if x3 == -1:
-            #            x3 = i
-            #        x4 = i
             break
+    cnt = []
+    for e in centers:
+        if e > 0:
+            cnt.append(e)
+    centers = cnt
     # average out the slope
     dy = float(top - bottom)
     slopes = [0] * c_idx
+    # pdb.set_trace()
     for i in range(c_idx):
-        if centers[i] - centers[i-1] != 0:
-            if i > 0:
-                slopes[i] = dy/(centers[i] - centers[i-1])
-        else:
-            slopes[i] = dy/centers[i]
+        if i > 0:
+            if centers[i] - centers[i-1] != 0:
+                slopes[i] = abs(dy/(centers[i] - centers[i-1]))
+            else:
+                slopes[i] = abs(dy/centers[i])
     del slopes[0]
-    slope = -abs(sum(slopes)/len(slopes))
-    print slope
+    slope = abs(sum(slopes)/len(slopes))
+    l = 14-14*slope
+    if slope < 0.2 or slope > 1.5:
+        slope = None
     #print "dx: " + str(dx) + ", dy: " + str(dy)
     dc = 0
     ft = [[False for x in range(width)] for y in range(height) ]
     for r in range(height):
         for c in range(width):
             if digit_data[r][c] > 0:
-                dc = bmx(slope, r)
+                dc = bmx(slope, r, l)
                 try:
                     ft[r][c - dc] = True
                 except:
                     ft[r][c] = True
+                    #pdb.set_trace()
     features = []
     for row in ft:
         for col in row:
             features.append(col)
     return features
 
-def bmx(slope, y):
+def bmx(slope, y, l):
     if slope is None:
-        return int(y)
+        return 0
     else:
-        return int((y-28)/slope)
-'''
+        return int((y-l)/slope)
 
 '''
 Extract the final features that you would like to use
