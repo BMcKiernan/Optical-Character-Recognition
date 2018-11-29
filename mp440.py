@@ -48,19 +48,6 @@ def extract_basic_features(digit_data, width, height):
 '''
 Extract advanced features that you will come up with 
 '''
-
-# Double image size and fill holes sorta
-
-'''def extract_advanced_features(digit_data, width, height):
-    features = [ False ] * (4*width*height)
-    for r in range(height):
-        for c in range(width):
-            if digit_data[r][c] > 0:
-                features[width*r*2 + c*2] = True
-    return features'''
-
-
-
 def extract_advanced_features(digit_data, width, height):
     #Feature 1:  Fix Image roatation <-----------------------------------------Advanced Feature 1
     x1 = -1
@@ -124,7 +111,6 @@ def extract_advanced_features(digit_data, width, height):
     for row in ft:
         for col in row:
             features.append(col)
-    #return features
 
     #Feature 2 Magnification of image by 4 <---------------------------------------- Advanced Feature 2
     features2 = [ False ] * (4*width*height)
@@ -133,7 +119,15 @@ def extract_advanced_features(digit_data, width, height):
             if features[i] > 0:
                 for j in range(4):
                     features2[i+j] = True
-    #return features2
+
+
+    #Basic features included for testing 
+   # for i in range(feature_len2):
+    #    if features2[i] == True:
+     #       features2[i] == False
+      #  else:
+       #     features2[i] == True '''
+
     
     #Feature 3 invert boolean  <---------------------------------------------------- Advanced Feature 3
     feature_len3 = len(features2)

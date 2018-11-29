@@ -18,3 +18,44 @@ a.6)
 We looked at the y=lnx curve and we noticed that if we set k=e, we would have all of our results positive, and that's what we tried first, this would give us an output range of [0, ln(e+1)]. We then thought that by moving the output range down to include negative numbers as well, so we tried to divide e by different ingtegers and found that e/9 yields the maximum output when substituted in the formulae that are provided in the link in the assignment description. That gave us 73% accuracy. This would imply that 8/9th of the range would be negative numbers and 1/9th positive => low accuracy is a big penalty and decreases your score. However, we noticed that by changing the formula a little bit by kicking k outside of the log and adding a very small number to the probability to avoid log(0) we got 82.5% prediction accuracy. So we went with this second approach with k + log(p+n). where k = e, p = probability that this feature is True and n = 0.0000001.
 We think the report is reasonably good since >80% leads to extra credit :)
 
+b.1) 
+
+For the first of the three advanced features we implemented we found the middle of the frame in which the images are positioned and then we found the top most pixel which was greater than 0 and the bottom most pixel which was greater than 0. By using the top pixel and the bottom pixel as the two points which form a line we were able to calculate the relative slope of the image and straighten out images which were rotated and did not match with the centerfold of the frame. 
+
+For the second advanced feature we scaled the image up by 2 while maintaining the aspect ratio. This means that each pixel which previously was only one list element in size is now 4 elements in size. The logic behind this is that the images's small distinguishing features might play more prevelance in the factoring that goes into determining the best guess for the class. 
+
+The last advanced feature we implemented was to create a "negative" of the image. By flipping the boolean values so that the pixels which were not part of the actual hand drawn number were true and the pixels which were part of the number were false we wanted to see if we could get a higher accuracy.
+
+Preformance for advanced feature set:
+
+10% of data: .131
+20% of data: .273
+30% of data: .151
+40% of data: .124
+50% of data: .19
+60% of data: .158
+70% of data: .437
+80% of data: .7
+90% of data: .776
+100% of data: .83
+
+b.2) 
+Preformance for basic & advanced feature set:
+
+
+10% of data: .131
+20% of data: .273
+30% of data: .151
+40% of data: .124
+50% of data: .19
+60% of data: .158
+70% of data: .437
+80% of data: .7
+90% of data: .776
+100% of data: .83
+
+
+The performance for the basic & advanced feature set was obviously the same because the third advanced feature was the opposite of the basic_feature when combining the advanced features with the basic features the last advanced feature canceled out the actions of the basic features extractor.
+
+The time difference was
+
