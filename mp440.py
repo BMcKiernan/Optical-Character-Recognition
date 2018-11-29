@@ -48,24 +48,21 @@ def extract_basic_features(digit_data, width, height):
 '''
 Extract advanced features that you will come up with 
 '''
-'''
+
 # Double image size and fill holes sorta
-def extract_advanced_features(digit_data, width, height):
+
+'''def extract_advanced_features(digit_data, width, height):
     features = [ False ] * (4*width*height)
     for r in range(height):
         for c in range(width):
             if digit_data[r][c] > 0:
                 features[width*r*2 + c*2] = True
-                features[width*r*2 + c*2 + 1] = True
-                features[width*r*2 + c*2 - 1] = True
-                features[(width-1)*r*2 + c*2] = True
-                if r < height - 1:
-                    features[(width+1)*r*2 + c*2] = True
-    return features
-'''
+    return features'''
+
 
 
 def extract_advanced_features(digit_data, width, height):
+    #Feature 1:  Fix Image roatation <-----------------------------------------Advanced Feature 1
     x1 = -1
     x2 = -1
     x3 = -1
@@ -127,7 +124,29 @@ def extract_advanced_features(digit_data, width, height):
     for row in ft:
         for col in row:
             features.append(col)
-    return features
+    #return features
+
+    #Feature 2 Magnification of image by 4 <---------------------------------------- Advanced Feature 2
+    features2 = [ False ] * (4*width*height)
+    feature_len2 = len(features)
+    for i in range(feature_len2):
+            if features[i] > 0:
+                for j in range(4):
+                    features2[i+j] = True
+    #return features2
+    
+    #Feature 3 invert boolean  <---------------------------------------------------- Advanced Feature 3
+    feature_len3 = len(features2)
+    features3 = [True] * feature_len3
+    for i in range(feature_len3):
+        if features2[i]:
+            features3[i] = False
+        else:
+            features3[i] = True
+
+    return features3
+
+    
 
 def bmx(slope, y, l):
     if slope is None:
