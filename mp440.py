@@ -12,27 +12,7 @@ prior = {}
 k = math.e
 
 '''
-Raise a "not defined" exception as a reminder 
-'''
-def _raise_not_defined():
-    print "Method not implemented: %s" % inspect.stack()[1][3]
-    sys.exit(1)
-
-def _value_to_pixel(value):
-    if(value == 0):
-        return ' '
-    elif(value == 1):
-        return '#'
-    elif(value == 2):
-        return '+'
-
-
-def _print_digit_image(data):
-    for row in range(len(data)):
-        print ''.join(map(_value_to_pixel, data[row]))
-
-'''
-Eundorxtract 'basic' features, i.e., whether a pixel is backgro 
+Extract 'basic' features, i.e., whether a pixel is backgro 
 forground (part of the digit) 
 '''
 def extract_basic_features(digit_data, width, height):
@@ -49,7 +29,7 @@ def extract_basic_features(digit_data, width, height):
 Extract advanced features that you will come up with 
 '''
 def extract_advanced_features(digit_data, width, height):
-    #Feature 1:  Fix Image roatation <-----------------------------------------Advanced Feature 1
+    #Feature 1:  Fix Image rotation <--- Advanced Feature 1
     x1 = -1
     x2 = -1
     x3 = -1
@@ -83,7 +63,6 @@ def extract_advanced_features(digit_data, width, height):
     # average out the slope
     dy = float(top - bottom)
     slopes = [0] * c_idx
-    # pdb.set_trace()
     for i in range(c_idx):
         if i > 0:
             if centers[i] - centers[i-1] != 0:
@@ -95,7 +74,6 @@ def extract_advanced_features(digit_data, width, height):
     l = 14-14*slope
     if slope < 0.2 or slope > 1.5:
         slope = None
-    #print "dx: " + str(dx) + ", dy: " + str(dy)
     dc = 0
     ft = [[False for x in range(width)] for y in range(height) ]
     for r in range(height):
@@ -106,42 +84,33 @@ def extract_advanced_features(digit_data, width, height):
                     ft[r][c - dc] = True
                 except:
                     ft[r][c] = True
-                    #pdb.set_trace()
     features = []
     for row in ft:
         for col in row:
             features.append(col)
 
-    #Feature 2 Magnification of image by 4 <---------------------------------------- Advanced Feature 2
+    #Feature 2 Magnification of image by 2 <--- Advanced Feature 2
     features2 = [ False ] * (4*width*height)
     feature_len2 = len(features)
     for i in range(feature_len2):
             if features[i] > 0:
-                for j in range(4):
+                for j in range(2):
                     features2[i+j] = True
-
-
-    #Basic features included for testing 
-   # for i in range(feature_len2):
-    #    if features2[i] == True:
-     #       features2[i] == False
-      #  else:
-       #     features2[i] == True '''
-
-    
-    #Feature 3 invert boolean  <---------------------------------------------------- Advanced Feature 3
     feature_len3 = len(features2)
-    features3 = [True] * feature_len3
-    for i in range(feature_len3):
-        if features2[i]:
-            features3[i] = False
-        else:
-            features3[i] = True
 
-    return features3
+    #Feature 3 Fill holes <--- Advanced Feature 3 
+    for i in range(width):
+        row = width*2*i
+        for col in range(width*2):
+            if not features2[row+col]:
+                if row < width**2 - width and row > 1 and col > 1 and col < width*2-1:
+                    if features2[row + col + 1] and features2[row + col - 1] and features2[row + col - width] and features2[row + col + width]:
+                        features2[row + col] = True
+
+    return features2
 
     
-
+#Helper function for Feature 1
 def bmx(slope, y, l):
     if slope is None:
         return 0
@@ -152,12 +121,85 @@ def bmx(slope, y, l):
 Extract the final features that you would like to use
 '''
 def extract_final_features(digit_data, width, height):
-    features=[]
-    # Your code starts here 
-    # You should remove _raise_not_defined() after you complete your code
-    # Your code ends here 
-    _raise_not_defined()
-    return features
+    #Feature 1:  Fix Image roatation 
+    x1 = -1
+    x2 = -1
+    x3 = -1
+    x4 = -1
+    top = 0
+    bottom = height - 1
+    c_idx = 0
+    centers = [ 0 ] * width
+    for row in digit_data:
+        if 1 in row or 2 in row:
+            for i, val in enumerate(row):
+                if val > 0:
+                    if x1 == -1:
+                        x1 = i
+                    x2 = i
+            centers[c_idx] = float(x2 + x1)/2
+            c_idx += 1
+            x1 = -1
+        else:
+            if c_idx < 1:
+                top += 1
+    for idx in range(height):
+        if 1 in digit_data[-idx] or 2 in digit_data[-idx]:
+            bottom -= idx
+            break
+    cnt = []
+    for e in centers:
+        if e > 0:
+            cnt.append(e)
+    centers = cnt
+    # average out the slope
+    dy = float(top - bottom)
+    slopes = [0] * c_idx
+    for i in range(c_idx):
+        if i > 0:
+            if centers[i] - centers[i-1] != 0:
+                slopes[i] = abs(dy/(centers[i] - centers[i-1]))
+            else:
+                slopes[i] = abs(dy/centers[i])
+    del slopes[0]
+    slope = abs(sum(slopes)/len(slopes))
+    l = 14-14*slope
+    if slope < 0.2 or slope > 1.5:
+        slope = None
+    dc = 0
+    ft = [[False for x in range(width)] for y in range(height) ]
+    for r in range(height):
+        for c in range(width):
+            if digit_data[r][c] > 0:
+                dc = bmx(slope, r, l)
+                try:
+                    ft[r][c - dc] = True
+                except:
+                    ft[r][c] = True
+    features = []
+    for row in ft:
+        for col in row:
+            features.append(col)
+
+    #Feature 2 Magnification of image by 2 
+    features2 = [ False ] * (4*width*height)
+    feature_len2 = len(features)
+    for i in range(feature_len2):
+            if features[i] > 0:
+                for j in range(2):
+                    features2[i+j] = True
+    feature_len3 = len(features2)
+
+    #Feature 3 invert boolean 
+    features3 = [True] * feature_len3
+    for i in range(feature_len3):
+        if features2[i]:
+            features3[i] = False
+        else:
+            features3[i] = True
+
+    return features3
+   
 
 '''
 Compupte the parameters including the prior and and all the P(x_i|y). Note
@@ -234,30 +276,6 @@ of data
 def classify(data, width, height, feature_extractor):
     predicted=[]
     for image in data:
-        #print "Printing Image: "
-        #_print_digit_image(image)
         predicted.append(compute_class(feature_extractor(image, width, height)))
     return predicted
 
-
-
-def print_data(image_data, key):
-    span = (28*28)
-    count = 0
-    for i in range(2):
-        if i == 0:
-            print "\n\n Printing false for label " + str(key) + " \n"
-        else:
-            print "\n\n Printing true for label " + str(key) + " \n"
-        for j in range(span):
-            if count == 0 or 28%count != 0:
-                count += 1
-                print( str(image_data[i][j]) + " ,"),
-            else:
-                count += 1
-                print str(image_data[i][j]) + " \n"
-
-
-
-        
-    
